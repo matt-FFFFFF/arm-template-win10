@@ -18,7 +18,10 @@
             "type": "Microsoft.Resources/resourceGroups",
             "apiVersion": "2020-10-01",
             "location": "uksouth",
-            "name": "[parameters('name')]"
+            "name": "[parameters('name')]",
+            "tags": {
+                "cleanup": "true"
+            }
         },
         {
             "type": "Microsoft.Resources/deployments",
@@ -61,7 +64,7 @@
                         "publicIPAddresses_name": "[concat(parameters('name'),'-ip')]",
                         "networkSecurityGroups_name": "[concat(parameters('name'),'-nsg')]",
                         "virtualNetworks_name": "[concat(parameters('name'),'-vnet')]",
-                        "schedules_shutdown_computevm_name": "[concat(parameters('name'),'-shutdown')]"
+                        "schedules_shutdown_computevm_name": "[concat('shutdown-computevm-', parameters('name'), '-vm')]"
                     },
                     "resources": [
                         {
