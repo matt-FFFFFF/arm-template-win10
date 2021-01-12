@@ -3,22 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
-            "defaultValue": "acct",
-            "type": "String"
+            "type": "String",
+            "metadata": {
+                "description": "Name of the VM"
+            }
         },
         "password": {
             "type": "securestring"
         }
-
     },
-    "variables": {
-        "virtualMachines_name": "[concat(parameters('name'),'-vm')]",
-        "networkInterfaces_name": "[concat(parameters('name'),'-nic')]",
-        "publicIPAddresses_name": "[concat(parameters('name'),'-ip')]",
-        "networkSecurityGroups_name": "[concat(parameters('name'),'-nsg')]",
-        "virtualNetworks_name": "[concat(parameters('name'),'-vnet')]",
-        "schedules_shutdown_computevm_name": "[concat(parameters('name'),'-shutdown')]"
-    },
+    "variables": {},
     "resources": [
         {
             "type": "Microsoft.Resources/resourceGroups",
@@ -31,23 +25,50 @@
             "apiVersion": "2020-06-01",
             "name": "[uniqueString(parameters('name'))]",
             "resourceGroup": "[parameters('name')]",
-            "location": "uksouth",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/resourceGroups/', parameters('name'))]"
             ],
             "properties": {
                 "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "Inner"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[parameters('name')]"
+                    },
+                    "password": {
+                        "value": "[parameters('password')]"
+                    }
+                },
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "parameters": {},
-                    "variables": {},
+                    "parameters": {
+                        "name": {
+                            "type": "String",
+                            "metadata": {
+                                "description": "Name of the VM"
+                            }
+                        },
+                        "password": {
+                            "type": "securestring"
+                        }
+                    },
+                    "variables": {
+                        "virtualMachines_name": "[concat(parameters('name'),'-vm')]",
+                        "networkInterfaces_name": "[concat(parameters('name'),'-nic')]",
+                        "publicIPAddresses_name": "[concat(parameters('name'),'-ip')]",
+                        "networkSecurityGroups_name": "[concat(parameters('name'),'-nsg')]",
+                        "virtualNetworks_name": "[concat(parameters('name'),'-vnet')]",
+                        "schedules_shutdown_computevm_name": "[concat(parameters('name'),'-shutdown')]"
+                    },
                     "resources": [
                         {
                             "type": "Microsoft.Network/networkSecurityGroups",
                             "apiVersion": "2020-05-01",
                             "name": "[variables('networkSecurityGroups_name')]",
-                            "location": "uksouth",
+                            "location": "[resourceGroup().location]",
                             "properties": {
                                 "securityRules": [
                                     {
@@ -70,12 +91,11 @@
                                 ]
                             }
                         },
-
                         {
                             "type": "Microsoft.Network/publicIPAddresses",
                             "apiVersion": "2020-05-01",
                             "name": "[variables('publicIPAddresses_name')]",
-                            "location": "uksouth",
+                            "location": "[resourceGroup().location]",
                             "sku": {
                                 "name": "Basic"
                             },
@@ -90,7 +110,7 @@
                             "type": "Microsoft.Network/virtualNetworks",
                             "apiVersion": "2020-05-01",
                             "name": "[variables('virtualNetworks_name')]",
-                            "location": "uksouth",
+                            "location": "[resourceGroup().location]",
                             "properties": {
                                 "addressSpace": {
                                     "addressPrefixes": [
@@ -117,7 +137,7 @@
                             "type": "Microsoft.Compute/virtualMachines",
                             "apiVersion": "2019-07-01",
                             "name": "[variables('virtualMachines_name')]",
-                            "location": "uksouth",
+                            "location": "[resourceGroup().location]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
                             ],
@@ -138,8 +158,7 @@
                                         "createOption": "FromImage",
                                         "caching": "ReadWrite",
                                         "managedDisk": {
-                                            "storageAccountType": "StandardSSD_LRS",
-                                            "id": "[resourceId('Microsoft.Compute/disks', concat(variables('virtualMachines_name'), '_OsDisk_1'))]"
+                                            "storageAccountType": "StandardSSD_LRS"
                                         },
                                         "diskSizeGB": 127
                                     },
@@ -154,8 +173,7 @@
                                         "enableAutomaticUpdates": true
                                     },
                                     "secrets": [],
-                                    "allowExtensionOperations": true,
-                                    "requireGuestProvisionSignal": true
+                                    "allowExtensionOperations": true
                                 },
                                 "networkProfile": {
                                     "networkInterfaces": [
@@ -165,8 +183,9 @@
                                     ]
                                 },
                                 "diagnosticsProfile": {
+
                                     "bootDiagnostics": {
-                                        "enabled": true
+                                        "enabled": false
                                     }
                                 },
                                 "licenseType": "Windows_Client"
@@ -176,7 +195,7 @@
                             "type": "microsoft.devtestlab/schedules",
                             "apiVersion": "2018-09-15",
                             "name": "[variables('schedules_shutdown_computevm_name')]",
-                            "location": "uksouth",
+                            "location": "[resourceGroup().location]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachines_name'))]"
                             ],
@@ -236,7 +255,7 @@
                             "type": "Microsoft.Network/networkInterfaces",
                             "apiVersion": "2020-05-01",
                             "name": "[variables('networkInterfaces_name')]",
-                            "location": "uksouth",
+                            "location": "[resourceGroup().location]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_name'))]",
                                 "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworks_name'), 'default')]",
