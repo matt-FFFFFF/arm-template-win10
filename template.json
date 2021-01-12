@@ -29,7 +29,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
-            "name": "[concat(parameters('name'),uniqueString(parameters('name')))]",
+            "name": "[concat(parameters('name'),uniqueString(utcnow()))]",
             "resourceGroup": "[parameters('name')]",
             "location": "uksouth",
             "dependsOn": [
