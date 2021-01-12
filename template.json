@@ -30,6 +30,8 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-06-01",
             "name": "[concat(parameters('name'),uniqueString(parameters('name')))]",
+            "resourceGroup": "[parameters('name')]",
+            "location": "uksouth",
             "dependsOn": [
                 "[resourceId('Microsoft.Resources/resourceGroups/', parameters('name'))]"
             ],
